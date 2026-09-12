@@ -44,4 +44,5 @@ You must launch the executable with an input file and output file. Input file is
 - The number of recursive loop (denoted by `n` is previous sections)
 - The axiom
 - Rules, one per line, in the form F=AB, where F is called predecessor (which letter is remplaced) and AB is called the successor (by what the predecessor will be remplaced). `=` symbol is required.
+
 Then launch the programme with ```.\build\L-system_GPU -i ..\example -o Lsystem.svg```.
