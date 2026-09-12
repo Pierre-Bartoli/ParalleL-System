@@ -112,11 +112,11 @@ Kokkos::View<int*> Render::computeBracket()
     // If the save add 1 to depth, if pop remove one to depth
     Kokkos::parallel_for("PassDepth", size, KOKKOS_LAMBDA(const int i){
         
-        if(Lsystem(i) == '[')
+        if(Lsystem(i) == SAVE)
         {
             bracketDepth(i) = 1;
         }
-        if(Lsystem(i) == ']')
+        if(Lsystem(i) == POP)
         {
             bracketDepth(i) = -1;
         }
@@ -145,11 +145,11 @@ Kokkos::View<int*> Render::computeBracket()
     // Compute the number of bracket in each depth
     Kokkos::View<int**> count("count", maxDepth, size);
     Kokkos::parallel_for("PassOffset", size, KOKKOS_LAMBDA(const int i){
-        if(Lsystem(i) == '[')
+        if(Lsystem(i) == SAVE)
         {
             count(bracketDepth(i), i) += 1;
         }
-        if(Lsystem(i) == ']')
+        if(Lsystem(i) == POP)
         {
             count(bracketDepth(i) - 1, i) += 1;
         }
@@ -189,13 +189,13 @@ Kokkos::View<int*> Render::computeBracket()
     Kokkos::View<int*> bucketArray("bucketArray", bracketTotal);
     Kokkos::parallel_for("ConstructBrackets", size, KOKKOS_LAMBDA(const int i){
 
-        if(Lsystem(i) == '[')
+        if(Lsystem(i) == SAVE)
         {
             int depth = bracketDepth(i);
             int index = bracketCount(depth) + offset(depth, i);
             bucketArray(index) = i;
         }
-        else if(Lsystem(i) == ']')
+        else if(Lsystem(i) == POP)
         {
             int depth = bracketDepth(i) - 1;
             int index = bracketCount(depth) + offset(depth, i);
@@ -263,7 +263,7 @@ void Render::bracket()
                 prefix = prefix.multiply(matrix);
                 matrices(i) = prefix;
 
-                if(symbol == '[')
+                if(symbol == SAVE)
                 {
                     int pop = popIndex(i);
                     int q = Kokkos::atomic_fetch_add(&nextCount(), 2);
@@ -313,7 +313,7 @@ void Render::writeSvg(Kokkos::View<Matrix4*> matrices)
         int bufferSize = 0;
 
         // if and only if the symbol is a step, compute the line size 
-        if(Lsystem(i) == 'F'){
+        if(Lsystem(i) == FORWARD){
 
             float x1 = 0;
             float y1 = 0;
@@ -379,7 +379,7 @@ void Render::writeSvg(Kokkos::View<Matrix4*> matrices)
         int offset = bufferOffset(i);
         char* out = &buffer(offset);
 
-        if(Lsystem(i) == 'F'){
+        if(Lsystem(i) == FORWARD){
             
             float x1 = 0;
             float y1 = 0;

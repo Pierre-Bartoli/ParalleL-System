@@ -7,6 +7,12 @@ class Render
 {
 public:
 
+    static const char SAVE = '[';
+    static const char POP  = ']';
+    static const char FORWARD = 'F';
+    static const char ROT_POS = '+';
+    static const char ROT_NEG = '-';
+
     Render(Kokkos::View<char*> Lsystem, float rotation, bool containsBracket, std::ofstream &writeFile);
 
     void withoutBracket();
