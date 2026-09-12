@@ -27,7 +27,8 @@ An L-system is by nature **sequential implemantation**, CPU must replace rule by
 
 ## Requirement :
  - `g++` compiler
- - For CUDA `nvcc` [compiler](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
+ - For CUDA : `nvcc` [compiler](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
+ - For HIP : `ROCm` [compiler](https://rocm.docs.amd.com/en/docs-6.0.2/reference/rocmcc.html)
 
 ## How to install :
 First download the github project, ```git clone https://github.com/Pierre-Bartoli/ParalleL-System.git```.
@@ -36,7 +37,7 @@ You can build the CPU (sequential version) or GPU version, `cd CPU` or `cd GPU`.
 `cmake -S . -B build` and `cmake --build build`, the executable is in `build/L-system_CPU`
 
 ### for GPU (parallel) :
-- You must choose your backend `-DKokkos_ENABLE_<BACKEND>=ON` and architecture `-DKokkos_ARCH_<ARCHITECTURE>=ON` (find for your configuration see [here](https://kokkos.org/kokkos-core-wiki/get-started/building-from-source.html#configuring-kokkos)),
+- You must choose your backend `-DKokkos_ENABLE_<BACKEND>=ON` and architecture `-DKokkos_ARCH_<ARCHITECTURE>=ON` (to find your configuration see [here](https://kokkos.org/kokkos-core-wiki/get-started/building-from-source.html#configuring-kokkos) and your [architecture](https://kokkos.org/kokkos-core-wiki/get-started/configuration-guide.html#architectures)),
 
 for example with CUDA with RTX 5070 : `cmake -S . -B build -DKokkos_ENABLE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=120`.
 - And compile it : `cmake --build build`.
@@ -49,4 +50,4 @@ You must launch the executable with an input file and output file. Input file is
 - The axiom
 - Rules, one per line, in the form F=AB, where F is called predecessor (which letter is remplaced) and AB is called the successor (by what the predecessor will be remplaced). `=` symbol is required.
 
-Then launch the programme with ```.\build\L-system_GPU -i ..\example -o Lsystem.svg```.
+Then launch the programme with ```.\build\L-system_GPU -i ..\example.txt -o Lsystem.svg```, it will generate the svg image according to the input file.
