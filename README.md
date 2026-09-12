@@ -25,6 +25,10 @@ And can continue. Thoses letters can also represent an action. For example `F` i
 ## Parallel aspect of the L-system :
 An L-system is by nature **sequential implemantation**, CPU must replace rule by rule its own string. Even the render turtle is sequential. But reading the litterature about L-system can gives us a insight of how to implement a parallel version of [it](https://www.cg.tuwien.ac.at/research/publications/2009/LIPP-2009-PGL/LIPP-2009-PGL-paper.pdf). String interpration can by parallelised with managing an array of offset to fill with parallel thread in it. For the render part with turtle, the key aspect of the algorithm is by using 4x4 matrix for deplacment representation where the associativity plays a central role.
 
+## Requirement :
+ - `g++` compiler
+ - For CUDA `nvcc` [compiler](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
+
 ## How to install :
 First download the github project, ```git clone https://github.com/Pierre-Bartoli/ParalleL-System.git```.
 You can build the CPU (sequential version) or GPU version, `cd CPU` or `cd GPU`.
