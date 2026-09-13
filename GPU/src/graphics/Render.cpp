@@ -394,11 +394,6 @@ void Render::writeSvg(Kokkos::View<Matrix4*> matrices)
             
             svgBuffer.writeLine(out, x1, x2, y1, y2);
 
-            if(i == size - 1)
-            {
-                *out = '\0';
-            }
-
         }
     });
 
