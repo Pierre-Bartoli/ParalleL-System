@@ -1,53 +1,127 @@
-# ParalleL-System :
-ParalleL-System is a L-system interpreter and render in parallel using kokkos written in C++.
+# ParalleL-System
 
-## What is a L-system ?
-A L-system or Lindermayer system is rewriting system. It consists of an alphabet that is recursively rewritten that make a string expanded by rules from an axiom. It can represent plants or fractals. 
-For exemple let consider, 
-- **alphabet** : V = {A, B}
-- **axiom** : w = A
-- **Rules** : (A -> AB), (B -> A)
-  
-All A will be replaced by AB, and all B by A. Starting with axiom A we have
+**ParalleL-System** is a C++ project for generating and rendering **L-systems**, with a sequential CPU implementation and a parallel implementation built using [Kokkos](https://kokkos.org/).
 
-`n = 0` : A
+The project explores how both string rewriting and turtle-based rendering can be parallelized to generate fractal structures.
 
-`n = 1` : AB
- 
-`n = 2` : AB A
- 
-`n = 3` : AB A AB
+## What is an L-system?
 
-And can continue. Thoses letters can also represent an action. For example `F` is often understood by a step forward, or `+` and `-` is a rotation by a given angle. The Koch curve can draw beautiful fractals with the **axiom** F and the **rule** (F -> F+F-F-F+F), then with `n = 4` it shows this fractal :
+An **L-system** (Lindenmayer system) is a formal rewriting system. It starts with an initial string, called the **axiom**, and repeatedly applies production rules to generate increasingly complex strings. L-systems are commonly used to model plants, branching structures, and fractals.
 
-![Alt text](./show.svg)
+For example, consider:
 
-## Parallel aspect of the L-system :
-An L-system is by nature **sequential implemantation**, CPU must replace rule by rule its own string. Even the render turtle is sequential. But reading the litterature about L-system can gives us a insight of how to implement a parallel version of [it](https://www.cg.tuwien.ac.at/research/publications/2009/LIPP-2009-PGL/LIPP-2009-PGL-paper.pdf). String interpration can by parallelised with managing an array of offset to fill with parallel thread in it. For the render part with turtle, the key aspect of the algorithm is by using 4x4 matrix for deplacment representation where the associativity plays a central role.
+- **Alphabet:** `V = {A, B}`
+- **Axiom:** `A`
+- **Production rules:** `A → AB` and `B → A`
 
-## Requirement :
- - `g++` compiler
- - For CUDA : `nvcc` [compiler](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
- - For HIP : `ROCm` [compiler](https://rocm.docs.amd.com/en/docs-6.0.2/reference/rocmcc.html)
+At each iteration, every `A` is replaced with `AB`, and every `B` is replaced with `A`:
 
-## How to install :
-First download the github project, ```git clone https://github.com/Pierre-Bartoli/ParalleL-System.git```.
-You can build the CPU (sequential version) or GPU version, `cd CPU` or `cd GPU`.
-### for CPU (sequential) : 
-`cmake -S . -B build` and `cmake --build build`, the executable is in `build/L-system_CPU`
+| Iteration | Result |
+| --- | --- |
+| `n = 0` | `A` |
+| `n = 1` | `AB` |
+| `n = 2` | `ABA` |
+| `n = 3` | `ABAAB` |
 
-### for GPU (parallel) :
-- You must choose your backend `-DKokkos_ENABLE_<BACKEND>=ON` and architecture `-DKokkos_ARCH_<ARCHITECTURE>=ON` (to find your configuration see [here](https://kokkos.org/kokkos-core-wiki/get-started/building-from-source.html#configuring-kokkos) and your [architecture](https://kokkos.org/kokkos-core-wiki/get-started/configuration-guide.html#architectures)),
+The generated symbols can also represent drawing commands. In turtle graphics, for example:
 
-for example with CUDA with RTX 5070 : `cmake -S . -B build -DKokkos_ENABLE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=120`.
-- And compile it : `cmake --build build`.
-The executable is in build `build\L-system_GPU`
+- `F` means move forward while drawing a line.
+- `+` and `-` mean rotate by a specified angle in opposite directions.
 
-## How to use :
-You must launch the executable with an input file and output file. Input file is a text file that contains in this order :
-- The angle of rotations in degrees
-- The number of recursive loop (denoted by `n` is previous sections)
-- The axiom
-- Rules, one per line, in the form F=AB, where F is called predecessor (which letter is remplaced) and AB is called the successor (by what the predecessor will be remplaced). `=` symbol is required.
+Using the axiom `F` and the production rule `F → F+F-F-F+F`, we can generate a Koch-type fractal. The following illustration shows the result after four iterations:
 
-Then launch the programme with ```.\build\L-system_GPU -i ..\example.txt -o Lsystem.svg```, it will generate the svg image according to the input file.
+![L-system fractal after four iterations](./show.svg)
+
+## Parallelizing L-systems
+
+A straightforward implementation of an L-system rewrites its string sequentially, while a conventional turtle interpreter processes drawing commands in order. However, both stages offer opportunities for parallel execution.
+
+### Parallel string rewriting
+
+The rewritten length contributed by each symbol can be computed independently. By calculating output offsets, parallel threads can write their corresponding replacements into separate regions of the resulting string.
+
+### Parallel turtle interpretation
+
+Turtle movements can be represented using **4 × 4 transformation matrices**. Because matrix multiplication is associative, transformations can be combined using parallel algorithms while preserving their order.
+
+This approach is related to the techniques described in [Parallel Generation of L-Systems](https://www.cg.tuwien.ac.at/research/publications/2009/LIPP-2009-PGL/LIPP-2009-PGL-paper.pdf).
+
+## Requirements
+
+- A C++ compiler, such as `g++`
+- [CMake](https://cmake.org/)
+- For the parallel implementation: [Kokkos](https://kokkos.org/) and a supported execution backend
+- For CUDA builds: the NVIDIA CUDA toolkit, including [`nvcc`](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)
+- For HIP builds: the AMD [ROCm toolchain](https://rocm.docs.amd.com/)
+
+## Build instructions
+
+Clone the repository:
+
+```bash
+git clone https://github.com/Pierre-Bartoli/ParalleL-System.git
+cd ParalleL-System
+```
+
+### Sequential CPU implementation
+
+```bash
+cd CPU
+cmake -S . -B build
+cmake --build build
+```
+
+The executable is located at `CPU/build/L-system_CPU` (relative to the repository root).
+
+### Parallel implementation (Kokkos)
+
+Enter the GPU project directory:
+
+```bash
+cd GPU
+```
+
+Configure CMake for your chosen Kokkos backend and target architecture. For example, for CUDA on an NVIDIA RTX 5070:
+
+```bash
+cmake -S . -B build \
+  -DKokkos_ENABLE_CUDA=ON \
+  -DCMAKE_CUDA_ARCHITECTURES=120
+cmake --build build
+```
+
+The executable is located at `GPU/build/L-system_GPU` (relative to the repository root).
+
+Backend and architecture settings depend on your hardware and Kokkos configuration. See the Kokkos documentation for [build configuration](https://kokkos.org/kokkos-core-wiki/get-started/building-from-source.html#configuring-kokkos) and [supported architectures](https://kokkos.org/kokkos-core-wiki/get-started/configuration-guide.html#architectures).
+
+## Usage
+
+The program takes an input file describing the L-system and produces an SVG image.
+
+### Input file format
+
+The input file must contain the following, **in order**:
+
+1. The rotation angle, in degrees.
+2. The number of rewriting iterations (`n`).
+3. The axiom (initial string).
+4. One production rule per line, written as `predecessor=successor`.
+
+For example, `F=AB` replaces each `F` with `AB`. The `=` separator is required.
+
+### Run the program
+
+From the `GPU` directory, run:
+
+```bash
+./build/L-system_GPU -i ../example.txt -o Lsystem.svg
+```
+
+The program reads the L-system definition from `example.txt` and writes the rendered result to `Lsystem.svg`.
+
+On Windows, adjust the executable path and separators for your shell and build configuration.
+
+## References
+
+- [Parallel Generation of L-Systems (2009)](https://www.cg.tuwien.ac.at/research/publications/2009/LIPP-2009-PGL/LIPP-2009-PGL-paper.pdf)
+- [Kokkos documentation](https://kokkos.org/kokkos-core-wiki/)
