@@ -2,7 +2,7 @@
 
 #include <fstream>
 #include <vector>
-#include "../Grammar/Rule.hpp"
+#include "../grammar/Rule.hpp"
 
 /**
  * Reads the file

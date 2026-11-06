@@ -1,4 +1,4 @@
-#include "LsystemGenerator.hpp"
+#include "LSystemGenerator.hpp"
 #include <iostream>
 
 LSystemGenerator::LSystemGenerator(std::vector<char> axiom, std::vector<Rule> rules, int recursiveLevel)
