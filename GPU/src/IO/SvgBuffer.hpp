@@ -38,42 +38,44 @@ public:
 
     void finaliseSvg(auto h_buffer, std::ofstream &file, float minX, float maxX, float minY, float maxY)
     {
-        file << "<svg xmlns=\"http://www.w3.org/2000/svg\" "
-            << "viewBox=\""
-            << minX << " "
-            << minY << " "
-            << maxX - minX << " "
-            << maxY - minY
-            << "\">\n";
-        file << h_buffer.data() << "\n";
-        file << "</svg>" << std::endl;
+
+        if (file.is_open()) {
+            file << "<svg xmlns=\"http://www.w3.org/2000/svg\" "
+                << "viewBox=\""
+                << minX << " "
+                << minY << " "
+                << maxX - minX << " "
+                << maxY - minY
+                << "\">\n";
+            file << h_buffer.data();
+            file << "</svg>" << std::endl;
+            file.close();
+        }
     }
 
 private: 
 
     KOKKOS_INLINE_FUNCTION
-    int digits(float f) const
-    {
-        int x = round(f);
-        
-        if (x == 0)
-            return 3; // for 0.0 -> 3
+    int digits(float value) const {
 
-        int n = 0;
+        double x = static_cast<double>(value);
+        bool negative = Kokkos::signbit(x);
 
-        if (x < 0) {
-            n++;
-            x = -x;
+        if (negative) x = -x;
+
+        double rounded = Kokkos::floor(x * 10.0 + 0.5);
+        double integerPart = Kokkos::floor(rounded/10.0);
+
+        int count = 3;
+
+        while (integerPart >= 10.0) {
+            integerPart /= 10.0;
+            ++count;
         }
 
-        while (x != 0) {
-            n++;
-            x /= 10;
-        }
+        if (negative) ++count;
 
-        n += 2; //count one digit after (the dot and the first decimal)
-
-        return n;
+        return count;
     }
 
     KOKKOS_INLINE_FUNCTION

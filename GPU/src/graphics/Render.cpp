@@ -393,11 +393,13 @@ void Render::writeSvg(Kokkos::View<Matrix4*> matrices)
             float y2 = matrices(i).getMatrixAt(7);
             
             svgBuffer.writeLine(out, x1, x2, y1, y2);
-
+        
         }
     });
 
     auto h_buffer = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, buffer);
+    h_buffer(bufferTotal + 1) = '\0';
+
     svgBuffer.finaliseSvg(h_buffer, m_writeFile, minX, maxX, minY, maxY);
     
 }
